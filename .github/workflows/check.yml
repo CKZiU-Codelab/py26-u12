@@ -1,0 +1,24 @@
+name: check
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run every check.py in the repository
+        run: |
+          status=0
+          for directory in $(find . -maxdepth 2 -name check.py -printf '%h\n' | sort -u); do
+            echo "::group::$directory"
+            ( cd "$directory" && python3 check.py ) || status=1
+            echo "::endgroup::"
+          done
+          exit $status
